@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+	
+	<!-- 配置处理器映射  HandlerMapping -->
+<!-- 	<bean name="/index" class="cn.smbms.controller.IndexController"></bean>-->	
+	<!-- 自定义格式转换 -->
+	<!-- <bean id="myConversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<list>
+				<bean class="cn.smbms.tools.StringToDateConverter">
+					构造注入
+					<constructor-arg type="java.lang.String" value="yyyy-MM-dd"/>			
+				</bean>
+			</list>
+		</property>
+	</bean> -->
+	<!-- 使用注解形式 -->
+	<mvc:annotation-driven> <!-- conversion-service="myConversionService" -->
+		<mvc:message-converters> <!-- register-defaults="true" -->  
+   	 <!-- 解决JSON中文乱码 -->  
+	  <bean class="org.springframework.http.converter.StringHttpMessageConverter">  
+	    <property name="supportedMediaTypes">  
+		    <list>
+		    	<value>application/json;charset=UTF-8</value>
+		    </list>
+	    </property>
+	  </bean>  
+	  <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+	  	<property name="supportedMediaTypes">
+	  		<list>
+	  			<value>text/html;charset=UTF-8</value>
+	  			<value>application/json</value>
+	  		</list>
+	  	</property>
+	  	<!-- 指定输出的日期转换格式 -->
+	  	<property name="features">
+	  		<list>
+	  			<!-- Date日期转换器 -->
+	  			<value>WriteDateUseDateFormat</value>
+	  		</list>
+	  	</property>	  	  
+	  </bean>
+ </mvc:message-converters> 
+	</mvc:annotation-driven>
+	<context:component-scan base-package="cn.smbms.controller"></context:component-scan>
+	<!--配置试JSP图解析器  -->
+	<!-- <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean> -->
+	<!-- 配置多视图解析器：允许同意的内容数据呈现不同的view。例：.html、.xml、.json -->
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<!-- 支持参数匹配 -->
+		<property name="favorParameter" value="true"></property>
+		<property name="mediaTypes">
+			<map>
+				<!-- 如果请求后缀为html，则以html格式显示 -->
+				<entry key="html" value="text/html;charset=UTF-8"></entry>
+				<entry key="json" value="application/json;charset=UTF-8"></entry>
+				<entry key="xml" value="application/xml;charset=UTF-8"></entry>
+			</map>
+		</property>
+		<!-- 网页的视图解析器 -->
+		<property name="viewResolvers">
+			<list>
+				<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+					<property name="prefix" value="/WEB-INF/jsp/" />
+					<property name="suffix" value=".jsp" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	<!-- 静态资源文件的引用  例：js css-->
+	<mvc:resources location="/statics/" mapping="/statics/**"/>
+	
+	<!-- 配置拦截器 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/sys/**"/>
+			<bean class="cn.smbms.interceptor.SysInterceptor"></bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	<!-- 配置全局异常 -->
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="java.lang.RuntimeException">error</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<!-- 配置MultipartResolver,用于文件上传 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="5000000"></property><!-- 设置上传文件大小-->
+		<property name="defaultEncoding" value="UTF-8"></property><!-- 设置上传文件的编码格式 -->
+	</bean>
+</beans>

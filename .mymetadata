@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="SMBMS_NEW"
+  id="myeclipse.1516675817074"
+  context-root="/SMBMS_NEW"
+  j2ee-spec="6.0"
+  archive="SMBMS_NEW.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+
